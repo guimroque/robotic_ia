@@ -1,5 +1,6 @@
 import cv2
 import uuid
+from logs import LOGS
 
 
 # [CAM FILE]
@@ -11,10 +12,6 @@ import uuid
 #
 
 
-# enum logs
-LOGS = {
-    "CAM": "[EVENT_CAMERA]",
-}
 
 cv2.namedWindow("preview")
 # if 1 -> frontal cam
