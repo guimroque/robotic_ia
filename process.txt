@@ -1,0 +1,22 @@
+Objetivo:
+    - A partir de um modelo pré treinado, contendo 6 classes:
+        - box black
+        - box grey
+        - box white
+        - frame [Quadro branco]
+        - destiny [Berços laterais]
+        - slot [Quadrado vazio dentro dos berços laterais]
+    - Fazer a idenficação de cada um destes itens
+    - Medir suas distancias a partir do centro da mesa
+
+Processo:
+    - Definir em medidas xy o quadro branco, sendo os pontos:
+        - 4 pontos de extremidades
+        - ponto central
+    - Medir as coordenadas equivalentes no software e criar uma entidade [FRAME]
+    - Definir um ponto central [reference frame]
+    - Medir as ditancias do ponto central até a entidade Frame idenfitificada pela inferencia
+    - Calcular a partir da identificacao da inferencia as posicoes x,y equivalentes ao reference frame
+    
+Comandos:
+    - testar lib frame: python -m unittest classes/frame/test.py
