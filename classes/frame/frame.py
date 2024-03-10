@@ -61,10 +61,26 @@ class Frame:
         self.position: List[List[int]] = position
         self.dimensions: Tuple[float, float] = (0.0, 0.0)
 
+    #
+    # get_distance
+    #
+    # - @Description: Calculate the distance between two points using hipothenuse
+    # 
+    # - @Params: point1: Tuple[int, int], point2: Tuple[int, int]
+    # - @Return: float
+    #
     @staticmethod
     def get_distance(point1: Tuple[int, int], point2: Tuple[int, int]) -> float:
         return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
+    #
+    # calculate_dimensions
+    #
+    # - @Description: Calculate the width and height of the frame based on the vertices coordinates
+    # 
+    # - @Params: coords: List[List[int]]
+    # - @Return: Tuple[float, float]
+    #
     @staticmethod
     def calculate_dimensions(coords: List[List[int]]) -> Tuple[float, float]:
         if len(coords) >= 4:
@@ -76,6 +92,18 @@ class Frame:
             return w, h
         return 0.0, 0.0
 
+
+    #
+    # draw_frames
+    #
+    # - @Description: Draw a list of frames on the image and mark distances and vertices
+    #                 - red point for vertices and center of the frame
+    #                 - green lines for the frame
+    #                 - yellow lines for the distance between the frames and the reference frame
+    # 
+    # - @Params: frames: List['Frame'], reference_frame: 'Frame', save: bool = True, background_img_path: str = None, filename: str = 'frames_image.png'
+    # - @Return: None
+    #
     @staticmethod
     def draw_frames(frames: List['Frame'], reference_frame: 'Frame', save: bool = True, background_img_path: str = None, filename: str = 'frames_image.png', ) -> None:
         if not frames:
@@ -172,8 +200,6 @@ class Frame:
             [img_size[0]-1, img_size[1]-1, 0, 0],  # down-right
             [0, img_size[1]-1, 0, 0],  # down-left
         ]
-
-        # calculate the center
         center_x = img_size[0] // 2
         center_y = img_size[1] // 2
         center = [center_x, center_y, 0, 0]
@@ -181,18 +207,27 @@ class Frame:
 
         return Frame(name, position=coords, coords=coords, reason=reason)
 
+
+    #
+    # yolov8_infer
+    #
+    # - @Description: Generate a new frame with output from YOLOv8 and calculate the center
+    # 
+    # - @Params: box: List[int]
+    # - @Return: 'Frame'
+    #
     @staticmethod
     def yolov8_infer(box: List[int]) -> 'Frame':
         x1, y1, x2, y2 = map(int, box[:4])
-        # (x1, y1): Vértice superior esquerdo (canto superior esquerdo do retângulo).
-        # (x2, y1): Vértice superior direito (canto superior direito do retângulo).
-        # (x2, y2): Vértice inferior direito (canto inferior direito do retângulo).
-        # (x1, y2): Vértice inferior esquerdo (canto inferior esquerdo do retângulo).
+        # (x1, y1): up-left
+        # (x2, y1): up-right
+        # (x2, y2): down-right
+        # (x1, y2): down-left
         coords = [
-            [x1, y1, 0, 0],  # Superior Esquerdo
-            [x2, y1, 0, 0],  # Superior Direito
-            [x2, y2, 0, 0],  # Inferior Direito
-            [x1, y2, 0, 0]  # Inferior Esquerdo
+            [x1, y1, 0, 0],  
+            [x2, y1, 0, 0],  
+            [x2, y2, 0, 0],  
+            [x1, y2, 0, 0]  
         ]
         footer_dist = Frame.get_distance((x2, y2), (x1, y2))/2
         right_dist = Frame.get_distance((x2, y2), (x2, y1))/2
