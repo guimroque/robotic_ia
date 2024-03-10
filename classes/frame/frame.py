@@ -4,28 +4,26 @@ import cv2
 import numpy as np
 import random
 import os
+from enum import Enum
+import torch
 
 
-# Correção das constantes (usando strings para as chaves)
-INFO_TYPE = {
-    'PHYSICAL': 0,
-    'VIRTUAL': 1
-}
+class InfoType(Enum):
+    PHYSICAL = 0
+    VIRTUAL = 1
 
-POINTS = {
-    'VERTICE_1': 0,  # up-left
-    'VERTICE_2': 1,  # up-right
-    'VERTICE_3': 2,  # down-right
-    'VERTICE_4': 3,  # down-left
-    'CENTRO': 4      # center
-}
+class Point(Enum):
+    VERTICE_1 = 0  # up-left
+    VERTICE_2 = 1  # up-right
+    VERTICE_3 = 2  # down-right
+    VERTICE_4 = 3  # down-left
+    CENTRO = 4      # center
 
-INFO = {
-    'X': 0,
-    'Y': 1,
-    'Z': 2,  # from high, to pixels format this value is 0 by default
-    'D_CENTER': 3,  # distance from center of reference frame
-}
+class Info(Enum):
+    X = 0
+    Y = 1
+    Z = 2  # from high, to pixels format this value is 0 by default
+    D_CENTER = 3  # distance from center of reference frame
 
 COORDS: List[List[int]] = [ # POINTS X INFO
     [0, 0, 0, 0],
@@ -46,66 +44,43 @@ DIMENSIONS: Tuple[float, float] = (0.0, 0.0)
 PIXELS_ON_COORDS = 1  # TODO: change this to a dynamic value
 PATH = './results'
 
+#todo:
+# - [ ] set reason to reference frame (is optional, use a default value of top length of the class [FRAME])
+#       - [ ] make a function to calculate the reason of the reference frame, based on the distance of top vertices and real distance
+#       - [ ] if reason is not set, calculate the reason of the reference frame
+#       - [ ] create a global variable to store real distance
+# - [ ] make a function to convert the pixels to real distance
+# - [ ] make a function to convert the real distance to pixels
+
 
 class Frame:
     def __init__(self, name: str, position: List[List[int]], coords: List[List[int]] = COORDS, reason: int = 1):
         self.name: str = name
         self.reason: int = reason
         self.coords: List[List[int]] = coords
-        self.pixels: List[List[int]] = position
+        self.position: List[List[int]] = position
         self.dimensions: Tuple[float, float] = (0.0, 0.0)
 
-    #
-    # get_distance
-    #
-    # - @Description: Calculate the distance between two points using hipothenuse
-    # 
-    # - @Params: point1: Tuple[int, int], point2: Tuple[int, int]
-    # - @Return: float
-    #
     @staticmethod
     def get_distance(point1: Tuple[int, int], point2: Tuple[int, int]) -> float:
         return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
-
-    #
-    # calculate_dimensions
-    #
-    # - @Description: Calculate the width and height of the frame based on the vertices coordinates
-    # 
-    # - @Params: coords: List[List[int]]
-    # - @Return: Tuple[float, float]
-    #
     @staticmethod
     def calculate_dimensions(coords: List[List[int]]) -> Tuple[float, float]:
         if len(coords) >= 4:
-            s_direito = (coords[POINTS['VERTICE_2']][INFO['X']], coords[POINTS['VERTICE_2']][INFO['Y']])
-            s_esquerdo = (coords[POINTS['VERTICE_1']][INFO['X']], coords[POINTS['VERTICE_1']][INFO['Y']])
-            i_direito = (coords[POINTS['VERTICE_3']][INFO['X']], coords[POINTS['VERTICE_3']][INFO['Y']])
+            s_direito = (coords[Point.VERTICE_2.value][Info.X], coords[Point.VERTICE_2.value][Info.Y])
+            s_esquerdo = (coords[Point.VERTICE_1.value][Info.X], coords[Point.VERTICE_1.value][Info.Y])
+            i_direito = (coords[Point.VERTICE_3.value][Info.X], coords[Point.VERTICE_3.value][Info.Y])
             w = Frame.get_distance(s_direito, s_esquerdo)
             h = Frame.get_distance(s_direito, i_direito)
             return w, h
         return 0.0, 0.0
-    
 
-
-    #
-    # draw_frames
-    #
-    # - @Description: Draw a list of frames on the image and mark distances and vertices
-    #                 - red point for vertices and center of the frame
-    #                 - green lines for the frame
-    #                 - yellow lines for the distance between the frames and the reference frame
-    # 
-    # - @Params: frames: List['Frame'], reference_frame: 'Frame', save: bool = True, background_img_path: str = None, filename: str = 'frames_image.png'
-    # - @Return: None
-    #
     @staticmethod
     def draw_frames(frames: List['Frame'], reference_frame: 'Frame', save: bool = True, background_img_path: str = None, filename: str = 'frames_image.png', ) -> None:
         if not frames:
             return
 
-        # Carregar ou criar a imagem base conforme especificado
         if background_img_path:
             img = cv2.imread(background_img_path)
             if img is None:
@@ -114,7 +89,6 @@ class Frame:
         else:
             max_x = int(Frame.calculate_dimensions(reference_frame.coords)[0])
             max_y = int(Frame.calculate_dimensions(reference_frame.coords)[1])
-
 
             img_size = (max_x, max_y)
             img = np.zeros((img_size[1], img_size[0], 3), dtype=np.uint8)
@@ -141,7 +115,6 @@ class Frame:
                 midpoint = ((center_current[0] + center_of_reference[0]) // 2, (center_current[1] + center_of_reference[1]) // 2)
                 cv2.putText(img, f"{distance:.2f}", midpoint, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
 
-
         if save:
             if not os.path.exists(PATH):
                 os.makedirs(PATH)
@@ -152,9 +125,6 @@ class Frame:
             cv2.imshow('Frames', img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-
-
-
 
     #
     # random
@@ -186,7 +156,6 @@ class Frame:
 
         return Frame(name, position=coords, coords=coords, reason=reason)
 
-
     #
     # full
     #
@@ -197,7 +166,6 @@ class Frame:
     #
     @staticmethod
     def full(img_size: Tuple[int, int], name: str = 'FullSizeFrame', reason: int = 1) -> 'Frame':
-        
         coords = [
             [0, 0, 0, 0],  # up-left
             [img_size[0]-1, 0, 0, 0],  # up-right
@@ -212,3 +180,25 @@ class Frame:
         coords.append(center)
 
         return Frame(name, position=coords, coords=coords, reason=reason)
+
+    @staticmethod
+    def yolov8_infer(box: List[int]) -> 'Frame':
+        x1, y1, x2, y2 = map(int, box[:4])
+        # (x1, y1): Vértice superior esquerdo (canto superior esquerdo do retângulo).
+        # (x2, y1): Vértice superior direito (canto superior direito do retângulo).
+        # (x2, y2): Vértice inferior direito (canto inferior direito do retângulo).
+        # (x1, y2): Vértice inferior esquerdo (canto inferior esquerdo do retângulo).
+        coords = [
+            [x1, y1, 0, 0],  # Superior Esquerdo
+            [x2, y1, 0, 0],  # Superior Direito
+            [x2, y2, 0, 0],  # Inferior Direito
+            [x1, y2, 0, 0]  # Inferior Esquerdo
+        ]
+        footer_dist = Frame.get_distance((x2, y2), (x1, y2))/2
+        right_dist = Frame.get_distance((x2, y2), (x2, y1))/2
+
+        center_x = x1 + int(footer_dist)
+        center_y = y2 - int(right_dist)
+        center = [center_x, center_y, 0, 0]
+        coords.append(center)
+        return Frame(f"frame{x1}", position=coords, coords=coords, reason=1)
