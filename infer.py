@@ -5,7 +5,8 @@ import math
 import cv2
 
 MODEL = './treinos/train5/weights/best.pt'
-IMAGE = './mocks/test_image/20240216_19_05_23_Pro.jpg'
+#IMAGE = './mocks/test_image/20240216_19_05_23_Pro.jpg'
+IMAGE='./images/TESTE.png'
 
 IMAGE_RESOLUTION = (1920, 1080)
 
