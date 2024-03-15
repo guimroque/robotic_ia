@@ -10,7 +10,7 @@ from ultralytics import YOLO
 
 
 # Constantes globais
-IMAGE = './mocks/run.jpg'
+IMAGE = './mocks/TESTE3.jpg'
 MODEL_BLOCKS = 'trains/train5/weights/best.pt'
 MODEL_TABLE = 'trains/table-v1/runs/detect/train4/weights/best.pt'
 IMAGE_RESOLUTION = (1920, 1080)
@@ -396,6 +396,5 @@ class Frame:
             'x_pixel_desloc': horizontal,
             'y_pixel_desloc': vertical
         }
-        print(f"Resultado: {result}")
         return result
         
