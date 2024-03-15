@@ -1,0 +1,13 @@
+train: /content/drive/MyDrive/Mesa.v1i.yolov8/train/images
+val: /content/drive/MyDrive/Mesa.v1i.yolov8/valid/images
+test: /content/drive/MyDrive/Mesa.v1i.yolov8/test/images
+
+nc: 2
+names: ['default_frame', 'table']
+
+roboflow:
+  workspace: tcc-qhnu9
+  project: mesa-djgi1
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/tcc-qhnu9/mesa-djgi1/dataset/1

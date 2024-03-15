@@ -6,7 +6,16 @@ import random
 import os
 from enum import Enum
 import torch
+from ultralytics import YOLO
 
+
+# Constantes globais
+IMAGE = './mocks/run.jpg'
+MODEL_BLOCKS = 'trains/train5/weights/best.pt'
+MODEL_TABLE = 'trains/table-v1/runs/detect/train4/weights/best.pt'
+IMAGE_RESOLUTION = (1920, 1080)
+TABLE_WIDTH_ON_MM = 594
+TABLE_HEIGHT_ON_MM = 400
 
 class InfoType(Enum):
     PHYSICAL = 0
@@ -40,9 +49,8 @@ DIMENSIONS_NAMES = {
 }
 
 DIMENSIONS: Tuple[float, float] = (0.0, 0.0)
-
-PIXELS_ON_COORDS = 1  # TODO: change this to a dynamic value
 PATH = './results'
+
 
 #todo:
 # - [ ] set reason to reference frame (is optional, use a default value of top length of the class [FRAME])
@@ -52,14 +60,30 @@ PATH = './results'
 # - [ ] make a function to convert the pixels to real distance
 # - [ ] make a function to convert the real distance to pixels
 
+# origins by executable -> classes.frame.frame
 
 class Frame:
-    def __init__(self, name: str, position: List[List[int]], coords: List[List[int]] = COORDS, reason: int = 1):
-        self.name: str = name
+    def __init__(self, name: str, position: List[List[int]], coords:  List[List[int]], reason: int = 1):
+        self.name: str = name 
         self.reason: int = reason
         self.coords: List[List[int]] = coords
         self.position: List[List[int]] = position
         self.dimensions: Tuple[float, float] = (0.0, 0.0)
+
+    #
+    # consts
+    #
+    # - @Description: Return the constants of the class
+    # - @Return: List[str]
+    #
+    @staticmethod
+    def consts():
+        IMAGE='./mocks/RUN.jpg',
+        MODEL_BLOCKS='trains/train5/weights/best.pt',
+        MODEL_TABLE='trains/table-v1/runs/detect/train4/weights/best.pt',
+        IMAGE_RESOLUTION=(1920, 1080)
+        return [IMAGE, MODEL_BLOCKS, MODEL_TABLE, IMAGE_RESOLUTION]
+        
 
     #
     # get_distance
@@ -105,7 +129,7 @@ class Frame:
     # - @Return: None
     #
     @staticmethod
-    def draw_frames(frames: List['Frame'], reference_frame: 'Frame', save: bool = True, background_img_path: str = None, filename: str = 'frames_image.png', ) -> None:
+    def draw_frames(frames: List['Frame'], reference_frame: 'Frame', save: bool = True, background_img_path: str = None, filename: str = 'frames_image.png', proportionality: float = 1.0) -> None:
         if not frames:
             return
 
@@ -139,14 +163,18 @@ class Frame:
             center_current = frame.coords[4][:2]
             if frame != reference_frame:
                 distance = Frame.get_distance(center_current, center_of_reference)
+                distance_mm = proportionality*distance;
                 cv2.line(img, center_current, center_of_reference, (0, 255, 255), 2)
                 midpoint = ((center_current[0] + center_of_reference[0]) // 2, (center_current[1] + center_of_reference[1]) // 2)
-                cv2.putText(img, f"{distance:.2f}", midpoint, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
+                midpoint_mm = (((center_current[0] + center_of_reference[0]) // 2), ((center_current[1] + center_of_reference[1]) // 2) + 15)
+                cv2.putText(img, f"{distance:.2f}pixels", midpoint, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
+                cv2.putText(img, f"{distance_mm:.2f}mm", midpoint_mm, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
+
 
         if save:
             if not os.path.exists(PATH):
                 os.makedirs(PATH)
-            file_path = os.path.join(PATH, filename)
+            file_path = os.path.join(PATH, 'IMAGE.png')
             cv2.imwrite(file_path, img)
             print(f"Frames salvos em: {file_path}")
         else:
@@ -163,7 +191,7 @@ class Frame:
     # - @Return: 'Frame'
     #
     @staticmethod
-    def random(img_size: Tuple[int, int], name: str = 'TESTE_NAME', reason: int = 1) -> 'Frame':
+    def random_frame(img_size: Tuple[int, int], name: str = 'TESTE_NAME', reason: int = 1) -> 'Frame':
         side_length = img_size[0] / 10
         x = random.randint(0, img_size[0] - int(side_length))
         y = random.randint(0, img_size[1] - int(side_length))
@@ -217,7 +245,7 @@ class Frame:
     # - @Return: 'Frame'
     #
     @staticmethod
-    def yolov8_infer(box: List[int]) -> 'Frame':
+    def yolov8_infer(box: List[int], prefix: str = random.randint(0, 777)) -> 'Frame':
         x1, y1, x2, y2 = map(int, box[:4])
         # (x1, y1): up-left
         # (x2, y1): up-right
@@ -236,4 +264,74 @@ class Frame:
         center_y = y2 - int(right_dist)
         center = [center_x, center_y, 0, 0]
         coords.append(center)
-        return Frame(f"frame{x1}", position=coords, coords=coords, reason=1)
+        return Frame(prefix, position=coords, coords=coords, reason=1)
+    
+    #
+    # infer_frames
+    #
+    # - @Description: Generate frames of image using YOLOv8
+    # 
+    # - @Params: img_path: str, model_path: str, prefix: str
+    # - @Return: list['Frame']
+    #
+    @staticmethod
+    def infer_frames(img_path: str, model_path: str, prefix: str) -> list['Frame']:
+        # Inferência
+        model = YOLO(model_path)
+        results = model(img_path)
+        xyxy = results[0].boxes.xyxy
+
+        # Frames
+        frames = []
+        for index, box in enumerate(xyxy):
+            _box = Frame.yolov8_infer(box, prefix=prefix)
+            _box.name = f"{prefix}_{index}"
+            frames.append(_box)
+
+        return frames
+    
+
+    #
+    # get_proportionality
+    #
+    # - @Description: Calculate the proportionality to pixels and real distance[mm]
+    # 
+    #       - get inference from yolov8 of the table model
+    #       - get distances from height and width of the table 
+    #       - calculate the proportionality of height and width
+    #       - calculate the average of the proportionality height and width
+    #       
+    # - @Params: image: str = IMAGE, model: str = MODEL_TABLE
+    # - @Return: 
+    #
+    @staticmethod
+    def get_proportionality(image: str = IMAGE, model: str = MODEL_TABLE) -> Tuple[float, float]:
+        # Inferência
+        model = YOLO(model)
+        results = model(image)
+        xyxy = results[0].boxes.xyxy
+
+        # Frames
+        for index, box in enumerate(xyxy):
+            frame = Frame.yolov8_infer(box, prefix='table')
+            frame.name = f"table_{index}"
+
+        # Calculate the proportionality
+        p_distance_width = Frame.get_distance((frame.coords[0][0], frame.coords[0][1]), (frame.coords[1][0], frame.coords[1][1]))
+        p_distance_height = Frame.get_distance((frame.coords[0][0], frame.coords[0][1]), (frame.coords[3][0], frame.coords[3][1]))
+
+        prop_width = TABLE_WIDTH_ON_MM / p_distance_width
+        prop_height = TABLE_HEIGHT_ON_MM / p_distance_height
+        average = (prop_width + prop_height) / 2
+
+        return {
+            'width_pixels': p_distance_width,
+            'height_pixels': p_distance_height,
+            'width_mm': p_distance_width * average,
+            'height_mm': p_distance_height * average,
+            'average': average
+        }
+
+
+
+        

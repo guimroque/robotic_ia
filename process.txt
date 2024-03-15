@@ -19,4 +19,6 @@ Processo:
     - Calcular a partir da identificacao da inferencia as posicoes x,y equivalentes ao reference frame
     
 Comandos:
-    - testar lib frame: python -m unittest classes/frame/test.py
+    - testes:
+        - lib frame: python -m unittest classes/frame/test.py
+        - infer: python -m unittest tests/infer.py
