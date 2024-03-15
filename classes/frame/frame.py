@@ -153,10 +153,11 @@ class Frame:
                 cv2.line(img, tuple(frame.coords[i][:2]), tuple(frame.coords[(i + 1) % 4][:2]), (0, 255, 0), 2)
 
             # write the vertices in red
-            for point in frame.coords[:5]:
-                cv2.circle(img, tuple(point[:2]), radius=5, color=(0, 0, 255), thickness=-1)
-                label = f"({point[0]}, {point[1]})"
-                cv2.putText(img, label, (point[0]+10, point[1]+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+            point = frame.coords[4]
+            cv2.circle(img, tuple(point[:2]), radius=5, color=(0, 0, 255), thickness=-1)
+            # to write the coordinates of the vertices (pixels)
+            label = f"({point[0]}, {point[1]})"
+            cv2.putText(img, label, (point[0]+10, point[1]+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
 
         # write the distances to the reference frame in yellow
         for frame in frames:
@@ -164,12 +165,23 @@ class Frame:
             if frame != reference_frame:
                 distance = Frame.get_distance(center_current, center_of_reference)
                 distance_mm = proportionality*distance;
-                cv2.line(img, center_current, center_of_reference, (0, 255, 255), 2)
+                # cv2.line(img, center_current, center_of_reference, (0, 255, 255), 2)
                 midpoint = ((center_current[0] + center_of_reference[0]) // 2, (center_current[1] + center_of_reference[1]) // 2)
                 midpoint_mm = (((center_current[0] + center_of_reference[0]) // 2), ((center_current[1] + center_of_reference[1]) // 2) + 15)
                 cv2.putText(img, f"{distance:.2f}pixels", midpoint, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
                 cv2.putText(img, f"{distance_mm:.2f}mm", midpoint_mm, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
 
+                #make a line of triangles
+                [horizontal, vertical] = Frame.get_desloc(center_of_reference, center_current)
+                # to write a line of triangles
+                # BASE -> vertical [VERMELHO]
+                cv2.line(img, (center_of_reference[0], center_of_reference[1]), (center_current[0]+horizontal, center_of_reference[1]+vertical), (0, 0, 255), 2)
+                # ALTURA -> horizontal [AZUL]
+                cv2.line(img, (center_current[0], center_current[1]), (center_current[0]+horizontal, center_of_reference[1]+vertical), (255, 0, 0), 2)
+                #print a point in the middle of the line and coordinates[x, y].fixed to 2 decimal places
+                cv2.circle(img, (center_current[0]+horizontal, center_of_reference[1]+vertical), radius=5, color=(0, 255, 255), thickness=-1)
+                label = f"({((horizontal*proportionality*-1)):.2f}, {(vertical*proportionality*-1):.2f})"
+                cv2.putText(img, label, (center_of_reference[0]+(horizontal*-1)+10, center_of_reference[1]+vertical+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
 
         if save:
             if not os.path.exists(PATH):
@@ -335,3 +347,28 @@ class Frame:
 
 
         
+    #
+    # set_coords
+    #
+    # - @Description: Set coords of the frame, based on the reference frame center
+    #       
+    #       - orientation of points(in pixels): top-left to top-right and top-right to down-right
+    #       - use an right triangle to calculate the new coords
+    #       - crie uma linha imaginaria entre o centro do frame de referencia [RF]:
+    #           - base do triangulo: RF até o centro do bloco, deslocado na vertical em:
+    #               - (y do bloco - y do RF) se y do bloco > y do RF
+    #               - (y do RF - y do bloco) se y do RF > y do bloco
+    #           - altura do triangulo: RF até o centro do bloco, deslocado na horizontal em (x do bloco - x do RF)
+    #               - (x do bloco - x do RF) se x do bloco > x do RF
+    #               - (x do RF - x do bloco) se x do RF > x do bloco
+    #       - calculate the proportionality of height and width
+    #       - calculate the average of the proportionality height and width
+    #       
+    # - @Params: reference_point: List[int], point: List[int]
+    # - @Return: coords: List[List[int]]
+    #
+    def get_desloc(reference_point: List[int], point: List[int]) -> List[List[int]]:
+        horizontal = abs(reference_point[0] - point[0]) * (1 if reference_point[0] > point[0] else -1)
+        vertical = abs(reference_point[1] - point[1]) * (-1 if reference_point[1] > point[1] else 1)
+        print(f"Deslocamento horizontal: {horizontal} e vertical: {vertical}")
+        return [horizontal, vertical]
