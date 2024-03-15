@@ -72,21 +72,6 @@ class Frame:
         self.dimensions: Tuple[float, float] = (0.0, 0.0)
 
     #
-    # consts
-    #
-    # - @Description: Return the constants of the class
-    # - @Return: List[str]
-    #
-    @staticmethod
-    def consts():
-        IMAGE='./mocks/run_simple.jpg',
-        MODEL_BLOCKS='trains/train5/weights/best.pt',
-        MODEL_TABLE='trains/table-v1/runs/detect/train4/weights/best.pt',
-        IMAGE_RESOLUTION=(1920, 1080)
-        return [IMAGE, MODEL_BLOCKS, MODEL_TABLE, IMAGE_RESOLUTION]
-        
-
-    #
     # get_distance
     #
     # - @Description: Calculate the distance between two points using hipothenuse
