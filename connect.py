@@ -1,6 +1,6 @@
 from robodk import robolink
 
-from logs import LOGS
+from CONSTANTES import LOGS
 
 
 # [CONNECT FILE]

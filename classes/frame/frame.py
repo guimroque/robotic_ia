@@ -138,34 +138,28 @@ class Frame:
                 # write the frame lines in green
                 cv2.line(img, tuple(frame.coords[i][:2]), tuple(frame.coords[(i + 1) % 4][:2]), (0, 255, 0), 2)
             cv2.putText(img, frame.name, (frame.coords[4][0], frame.coords[4][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
-            # write a red circle in the center of the frame 
-            # point = frame.coords[4]
-            # cv2.circle(img, tuple(point[:2]), radius=5, color=(0, 0, 255), thickness=-1)
-            # label = f"({point[0]}, {point[1]})"
-            # cv2.putText(img, label, (point[0]+10, point[1]+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
 
-        # write the distances to the reference frame in yellow
         for frame in frames:
             center_current = frame.coords[4][:2]
             if frame != reference_frame:
+                #calc distance
                 distance = Frame.get_distance(center_current, center_of_reference)
                 distance_mm = proportionality*distance;
-                # cv2.line(img, center_current, center_of_reference, (0, 255, 255), 2)
+                
+                #calc center of block
                 midpoint = (frame.coords[4][0], frame.coords[4][1] + 15)
                 midpoint_mm = (frame.coords[4][0], frame.coords[4][1] + 30)
                 midpoint_coords = (frame.coords[4][0], frame.coords[4][1] + 45)
+
+                #calc coords -> pixels and mm
+                coords = Frame.get_coords(reference_frame, frame, reason=proportionality)
+                
+
+                #plot infos on box of block
                 cv2.putText(img, f"{distance:.2f}pixels", midpoint, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
                 cv2.putText(img, f"{distance_mm:.2f}mm", midpoint_mm, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
 
-                coords = Frame.get_coords(reference_frame, frame, reason=proportionality)
-                
-                # to write a line of triangles
-                # ALTURA -> vertical [VERMELHO]
-                cv2.line(img, (center_of_reference[0], center_of_reference[1]), (center_of_reference[0], center_of_reference[1]+coords['y_pixel_desloc']), (0, 0, 255), 2)
-                # LARGURA -> horizontal [AZUL]
-                cv2.line(img, (center_of_reference[0]+coords['x_pixel_desloc'], center_of_reference[1]+coords['y_pixel_desloc']), (center_of_reference[0], center_of_reference[1]+coords['y_pixel_desloc']), (255, 0, 0), 2)
-                #print a point in the middle of the line and coordinates[x, y].fixed to 2 decimal places
-                label = f"({((coords['x_mm']*proportionality)):.2f}, {(coords['y_mm']*proportionality*-1):.2f})mm"
+                label = f"({((coords['x_mm'])):.2f}, {(coords['y_mm']):.2f})mm"
                 cv2.putText(img, label, midpoint_coords, cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1)
 
         if save:
@@ -349,11 +343,9 @@ class Frame:
     #
     def get_desloc(reference_point: List[int], point: List[int]) -> List[List[int]]:
         horizontal = abs(point[0]-reference_point[0]) * (-1 if reference_point[0] > point[0] else 1)
-        vertical = abs(point[1] - reference_point[1]) * (-1 if reference_point[1] > point[1] else 1)
+        vertical = abs(point[1] - reference_point[1]) * (1 if reference_point[1] > point[1] else -1)
         return [horizontal, vertical]
     
-
-
 
     #
     # get_coords

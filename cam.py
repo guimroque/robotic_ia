@@ -1,6 +1,6 @@
 import cv2
 import uuid
-from logs import LOGS
+from CONSTANTES import LOGS
 
 
 # [CAM FILE]
