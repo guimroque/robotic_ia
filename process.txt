@@ -1,13 +1,30 @@
+--------------------------------------------------[PENDING]--------------------------------------------------
 Objetivo:
-    - A partir de um modelo pré treinado, contendo 6 classes:
+    - A partir das coordenadas calculadas na inferencia:
+        - Adicionar no projeto os blocos encontrados pela inferencia
+        - Manter a cor, coordenadas e quantidade
+        - Usar um padrão de nome facil de localizar
+    - Adicionar o método para remover os blocos
+        - blocos especificos
+        - todos os blocos
+
+--------------------------------------------------[PENDING]--------------------------------------------------
+
+
+
+
+
+
+
+--------------------------------------------------[DONE]--------------------------------------------------
+Objetivo:
+    - A partir de um modelo pré treinado, contendo 4 classes:
         - box black
         - box grey
         - box white
         - frame [Quadro branco]
-        - destiny [Berços laterais]
-        - slot [Quadrado vazio dentro dos berços laterais]
-    - Fazer a idenficação de cada um destes itens
-    - Medir suas distancias a partir do centro da mesa
+    - Fazer a idenficação de cada um destes itens -> ok
+    - Medir suas distancias a partir do centro da mesa -> ok
 
 Processo:
     - Definir em medidas xy o quadro branco, sendo os pontos:
@@ -22,3 +39,4 @@ Comandos:
     - testes:
         - lib frame: python -m unittest classes/frame/test.py
         - infer: python -m unittest tests/infer.py
+--------------------------------------------------[DONE]--------------------------------------------------
