@@ -1,5 +1,19 @@
 --------------------------------------------------[PENDING]--------------------------------------------------
 Objetivo:
+    - Criar uma interface para controlar a comunicacao entre rodo e servidor:
+        - Criar algo similar ao protocolo HTTP
+        - Etapas necessárias:
+            - Abrir comunicacao: envia um bit específico para avisar que dados serão enviados
+            - Receber dados: evento deve ficar ouvindo todos os bytes recebidos até que a flag de encerramento chegue
+            - Finalizar comunicacao: envia um bit especifico para sinalizar que os dados foram enviados
+            - Validação da mensagem: Enviar uma soma dos bits (por exemplo), depois da flag de encerramento
+            - Confirmar mensagem: o emissor após confirmar a mensagem, fica aguardando 2 respostas possíveis:
+                - sucesso   [bit 1]: encerrar comunicacao
+                - erro      [bit 2]: [enviar novamente mensagem]  
+--------------------------------------------------[PENDING]--------------------------------------------------
+
+--------------------------------------------------[DONE]--------------------------------------------------
+Objetivo:
     - A partir das coordenadas calculadas na inferencia:
         - Adicionar no projeto os blocos encontrados pela inferencia
         - Manter a cor, coordenadas e quantidade
@@ -8,13 +22,7 @@ Objetivo:
         - blocos especificos
         - todos os blocos
 
---------------------------------------------------[PENDING]--------------------------------------------------
-
-
-
-
-
-
+--------------------------------------------------[DONE]--------------------------------------------------
 
 --------------------------------------------------[DONE]--------------------------------------------------
 Objetivo:

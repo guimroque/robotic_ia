@@ -11,8 +11,6 @@ from CONSTANTES import LOGS
 # - close camera window with press ESC key
 #
 
-
-
 cv2.namedWindow("preview")
 # if 1 -> frontal cam
 # if 0 -> integrated cam
