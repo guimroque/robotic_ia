@@ -1,6 +1,3 @@
-from robodk import robomath
-
-
 # enum logs
 LOGS = {
     "CAM": "[EVENT_CAMERA]",

@@ -5,12 +5,12 @@ import numpy as np
 import random
 import os
 from enum import Enum
-import torch
 from ultralytics import YOLO
 
 
 # Constantes globais
-IMAGE = './mocks/TESTE3.jpg'
+PATH = './images'
+IMAGE = './images/image.png'
 MODEL_BLOCKS = 'trains/train5/weights/best.pt'
 MODEL_TABLE = 'trains/table-v1/runs/detect/train4/weights/best.pt'
 IMAGE_RESOLUTION = (1920, 1080)
@@ -50,7 +50,7 @@ DIMENSIONS_NAMES = {
 }
 
 DIMENSIONS: Tuple[float, float] = (0.0, 0.0)
-PATH = './results'
+
 
 
 #todo:
@@ -165,7 +165,7 @@ class Frame:
         if save:
             if not os.path.exists(PATH):
                 os.makedirs(PATH)
-            file_path = os.path.join(PATH, 'IMAGE.png')
+            file_path = os.path.join(PATH, filename)
             cv2.imwrite(file_path, img)
             print(f"Frames salvos em: {file_path}")
         else:

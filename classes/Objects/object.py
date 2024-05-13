@@ -1,3 +1,5 @@
+# Essa classe insere os objetos no ROBODK
+
 import random
 from robodk import robolink, robomath
 from CONSTANTES import REFERENCES, BLOCKS, BLOCKS_COLOR, BLOCKS_POSITION

@@ -1,16 +1,12 @@
---------------------------------------------------[PENDING]--------------------------------------------------
+--------------------------------------------------[DONE]--------------------------------------------------
 Objetivo:
-    - Criar uma interface para controlar a comunicacao entre rodo e servidor:
-        - Criar algo similar ao protocolo HTTP
-        - Etapas necessárias:
-            - Abrir comunicacao: envia um bit específico para avisar que dados serão enviados
-            - Receber dados: evento deve ficar ouvindo todos os bytes recebidos até que a flag de encerramento chegue
-            - Finalizar comunicacao: envia um bit especifico para sinalizar que os dados foram enviados
-            - Validação da mensagem: Enviar uma soma dos bits (por exemplo), depois da flag de encerramento
-            - Confirmar mensagem: o emissor após confirmar a mensagem, fica aguardando 2 respostas possíveis:
-                - sucesso   [bit 1]: encerrar comunicacao
-                - erro      [bit 2]: [enviar novamente mensagem]  
---------------------------------------------------[PENDING]--------------------------------------------------
+    - Criar uma interface para controlar a comunicacao entre robo e servidor:
+        - As mensagens são enviadas no padrão -> GXxxxxYyyyyDdE
+            - G: Bit que sinaliza uma mensagem válida
+            - X: Bit que sinaliza que os proximos serão valores da coordenada x, até 4 bits
+            - Y: Bit que sinaliza que os proximos serão valores da coordenada y, até 4 bits
+            - D: Bit que representa o index das posicoes pré-consiguradas (berços), até 1 bit [0, 1, ...11]
+--------------------------------------------------[DONE]--------------------------------------------------
 
 --------------------------------------------------[DONE]--------------------------------------------------
 Objetivo:
@@ -21,7 +17,6 @@ Objetivo:
     - Adicionar o método para remover os blocos
         - blocos especificos
         - todos os blocos
-
 --------------------------------------------------[DONE]--------------------------------------------------
 
 --------------------------------------------------[DONE]--------------------------------------------------
