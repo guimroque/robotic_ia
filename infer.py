@@ -26,7 +26,7 @@
 from CONSTANTES import LOGS
 from classes.Cam.cam import CameraApp
 from classes.Network.client import Client
-from classes.Frame.frame import Frame, IMAGE, MODEL_BLOCKS, MODEL_TABLE
+from classes.frame.frame import Frame, IMAGE, MODEL_BLOCKS, MODEL_TABLE
 
 cam = CameraApp()
 cam.capture_snapshot()

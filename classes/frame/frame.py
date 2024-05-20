@@ -11,8 +11,8 @@ from ultralytics import YOLO
 # Constantes globais
 PATH = './images'
 IMAGE = './images/image.png'
-MODEL_BLOCKS = 'trains/train5/weights/best.pt'
-MODEL_TABLE = 'trains/table-v1/runs/detect/train4/weights/best.pt'
+MODEL_BLOCKS = 'trains/block_s/weights/best.pt'
+MODEL_TABLE = 'trains/table/weights/best.pt'
 IMAGE_RESOLUTION = (1920, 1080)
 TABLE_WIDTH_ON_MM = 594
 TABLE_HEIGHT_ON_MM = 400
